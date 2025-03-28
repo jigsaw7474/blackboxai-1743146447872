@@ -1,48 +1,32 @@
 workflows:
-  ios-build:
-    name: iOS Build
-    environment:
-      flutter: stable
-      xcode: latest
+  version: 2.0
+  build:
+    name: Android Build Workflow
+    max_build_duration: 120 # Minutes
+    triggers:
+      - github:
+          push:
+            branches:
+              - main  # Trigger build on push to the main branch
     scripts:
-      - name: Install dependencies
-        script: |
-          flutter pub get
-      - name: Run tests
-        script: |
-          flutter test
-      - name: Build iOS app
-        script: |
-          flutter build ios --release
-    artifacts:
-      - build/ios/iphoneos/*.app
-      - build/ios/iphoneos/*.ipa
+      # Install dependencies for Flutter project
+      - name: Install Flutter dependencies
+        script: flutter pub get
 
-  android-build:
-    name: Android Build
-    environment:
-      flutter: stable
-    scripts:
-      - name: Install dependencies
-        script: |
-          flutter pub get
-      - name: Run tests
-        script: |
-          flutter test
-      - name: Build Android app
-        script: |
-          flutter build apk --release
+      # Run unit tests to ensure everything is working correctly
+      - name: Run Flutter tests
+        script: flutter test
+
+      # Build APK for Android release
+      - name: Build APK (Release)
+        script: flutter build apk --release
+
+    # Define the artifacts you want to save after the build
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/flutter-apk/app-release.aab  # Android App Bundle for Play Store
 
-  deploy:
-    name: Deploy to App Store
-    scripts:
-      - name: Deploy iOS app
-        script: |
-          # Add your deployment script here
-      - name: Deploy Android app
-        script: |
-              - name: Deploy Android app
-        script: |
-
+    environment:
+      vars:
+        FLUTTER_CHANNEL: stable  # Use stable Flutter version
+        ANDROID_HOME: $HOME/Android/Sdk  # Make sure Android SDK is available
