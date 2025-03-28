@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fiji Coffee - Machine Service Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f8f8f8;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            background: #2c3e50;
+            color: white;
+            border-radius: 8px;
+            margin: -20px -20px 20px -20px;
+        }
+        
+        .main-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .sub-title {
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+        
+        select, input[type="text"], input[type="datetime-local"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: #fff;
+            color: #444;
+            margin-bottom: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+        
+        .image-upload {
+            margin-bottom: 20px;
+        }
+        
+        .image-upload-button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .image-upload-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .submit-report-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 30px;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-report-btn:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .main-title {
+                font-size: 20px;
+            }
+            
+            .sub-title {
+                font-size: 16px;
+            }
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading::after {
+            content: '';
+            width: 50px;
+            height: 50px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading"></div>
+    <div class="container" id="service-report-form">
+        <div class="title-section">
+            <h1 class="main-title">Fiji Coffee</h1>
+            <h2 class="sub-title">Machine Service Report</h2>
+        </div>
+
+        <div class="form-group">
+            <label for="service-type">Type</label>
+            <select id="service-type" required>
+                <option value="">Select Type</option>
+                <option value="Servicing">Servicing</option>
+                <option value="Breakdown">Breakdown</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="technician-name">Technician (Name)</label>
+            <select id="technician-name" required>
+                <option value="">Select Technician</option>
+                <option value="Sergio Ruiz">Sergio Ruiz</option>
+                <option value="Neco">Neco</option>
+                <option value="Avinesh">Avinesh</option>
+                <option value="Hari">Hari</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="machine-type">Machine Type</label>
+            <select id="machine-type" required>
+                <option value="">Select Machine Type</option>
+                <option value="Frankee A300">Frankee A300</option>
+                <option value="Frankee A400">Frankee A400</option>
+                <option value="S700 Coffee Machine">S700 Coffee Machine</option>
+                <option value="Dalla Corte 'Studio'">Dalla Corte 'Studio'</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="fault-type">Fault</label>
+            <select id="fault-type" required>
+                <option value="">Select Fault Type</option>
+                <option value="User">User</option>
+                <option value="Machine">Machine</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="customer-name">Customer Name</label>
+            <input type="text" id="customer-name" placeholder="Enter customer name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="fault-details">Fault Details</label>
+            <textarea id="fault-details" rows="4" placeholder="Enter fault details..." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="fix-details">Fix Details</label>
+            <textarea id="fix-details" rows="4" placeholder="Enter fix details..." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="final-comments">Final Comments</label>
+            <textarea id="final-comments" rows="4" placeholder="Enter final comments..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="service-date">Date and Time of Service</label>
+            <input type="datetime-local" id="service-date" required>
+        </div>
+
+        <div class="form-group">
+            <label for="service-duration">Service Duration (in hours)</label>
+            <input type="text" id="service-duration" placeholder="Enter duration (e.g., 2 hours)" required>
+        </div>
+
+        <div class="form-group image-upload">
+            <label>Upload Images (Max 10)</label>
+            <button type="button" class="image-upload-button" onclick="document.getElementById('image-upload').click()">
+                <i class="fas fa-camera"></i> Select Images
+            </button>
+            <input type="file" id="image-upload" accept="image/*" multiple onchange="previewImages()" style="display: none;" max="10">
+            <div class="image-preview" id="image-preview"></div>
+        </div>
+
+        <button type="button" class="submit-report-btn" onclick="generateServiceReportPDF()">
+            <i class="fas fa-file-pdf"></i> Generate Report
+        </button>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function previewImages() {
+            const preview = document.getElementById('image-preview');
+            const files = document.getElementById('image-upload').files;
+            preview.innerHTML = '';
+
+            if (files.length > 10) {
+                Android.showToast('Maximum 10 images allowed');
+                document.getElementById('image-upload').value = '';
+                return;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        preview.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        function validateForm() {
+            const requiredFields = [
+                'service-type',
+                'technician-name',
+                'machine-type',
+                'fault-type',
+                'customer-name',
+                'fault-details',
+                'fix-details',
+                'service-date',
+                'service-duration'
+            ];
+
+            for (const fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    Android.showToast(`Please fill in ${field.previousElementSibling.textContent}`);
+                    field.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        async function generateServiceReportPDF() {
+            if (!validateForm()) return;
+
+            showLoading();
+            const element = document.getElementById("service-report-form");
+            
+            try {
+                const opt = {
+                    margin: 10,
+                    filename: 'Service_Report.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                const pdf = await html2pdf().set(opt).from(element).save();
+                Android.showToast('Report generated successfully');
+                
+                // Optional: Share the PDF
+                // Android.sharePDF('/path/to/generated/pdf');
+            } catch (error) {
+                Android.showToast('Error generating PDF: ' + error.message);
+                console.error('PDF generation error:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Initialize date input with current date and time
+        window.onload = function() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('service-date').value = now.toISOString().slice(0,16);
+        }
+    </script>
+</body>
+</html>
