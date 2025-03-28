@@ -1,3 +1,45 @@
-git add codemagic.yaml
-git commit -m 'Add first workflow'
-git push
+workflows:
+  ios-build:
+    name: iOS Build
+    environment:
+      flutter: stable
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: |
+          flutter pub get
+      - name: Run tests
+        script: |
+          flutter test
+      - name: Build iOS app
+        script: |
+          flutter build ios --release
+    artifacts:
+      - build/ios/iphoneos/*.app
+      - build/ios/iphoneos/*.ipa
+
+  android-build:
+    name: Android Build
+    environment:
+      flutter: stable
+    scripts:
+      - name: Install dependencies
+        script: |
+          flutter pub get
+      - name: Run tests
+        script: |
+          flutter test
+      - name: Build Android app
+        script: |
+          flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+
+  deploy:
+    name: Deploy to App Store
+    scripts:
+      - name: Deploy iOS app
+        script: |
+          # Add your deployment script here
+      - name: Deploy Android app
+        script: |
