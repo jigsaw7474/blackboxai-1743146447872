@@ -17,7 +17,9 @@ jobs:
           java-version: '17'
 
       - name: Ensure gradlew has executable permissions
-        run: chmod +x ./gradlew
+        run: |
+          chmod +x ./gradlew
+          chmod +x ./gradle/wrapper/gradle-wrapper.jar  # Added for completeness
 
       - name: Clean Gradle Build
         run: ./gradlew clean
