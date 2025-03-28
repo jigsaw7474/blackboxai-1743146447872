@@ -43,3 +43,6 @@ workflows:
           # Add your deployment script here
       - name: Deploy Android app
         script: |
+              - name: Deploy Android app
+        script: |
+
